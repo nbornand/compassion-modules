@@ -60,7 +60,7 @@ class CommunicationJob(models.Model):
     _description = 'Communication Job'
     _order = 'date desc,sent_date desc'
     _inherit = ['partner.communication.defaults', 'ir.needaction_mixin',
-                'mail.thread']
+                'mail.thread', 'partner.communication.orm.config.abstract']
 
     ##########################################################################
     #                                 FIELDS                                 #
@@ -246,13 +246,21 @@ class CommunicationJob(models.Model):
         # Determine user by default : take in config or employee
         if not vals.get('user_id'):
             vals['user_id'] = config.user_id.id or self.env.uid
+        user = self.env['res.users'].browse(vals['user_id'])
+        orm_config_of_right_lang = config.omr_config_ids \
+            .filtered(lambda c: c.lang_id.code == user.lang)
+        orm_config = orm_config_of_right_lang[0] if orm_config_of_right_lang \
+            else config.omr_config_ids
 
         # Check all default_vals fields
         for default_val in default_vals:
             if default_val not in vals:
-                value = getattr(config, default_val)
-                if default_val.endswith('_id'):
-                    value = value.id
+                if default_val.startswith('omr_'):
+                    value = getattr(orm_config, default_val, False)
+                else:
+                    value = getattr(config, default_val)
+                    if default_val.endswith('_id'):
+                        value = value.id
                 vals[default_val] = value
 
         return config

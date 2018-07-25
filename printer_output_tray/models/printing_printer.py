@@ -83,6 +83,8 @@ class PrintingPrinter(models.Model):
         options = super(PrintingPrinter, self).print_options(report, format)
 
         if report is not None:
+            full_report = self.env['report']._get_report_from_name(report) \
+                if isinstance(report, basestring) else report
             options['OutputBin'] = 'Default'  # str(tray.system_name)
 
         return options

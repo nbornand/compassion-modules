@@ -46,7 +46,7 @@ class RecurringContract(models.Model):
             partner = self.env['res.partner'].search([
                 ('firstname', 'ilike', vals['firstname']),
                 ('lastname', 'ilike', vals['lastname']),
-                ('email', '=', vals['email'])
+                ('email', '=', vals['email']),
             ])
             sms_child_request.partner_id = partner
         else:
@@ -61,6 +61,7 @@ class RecurringContract(models.Model):
                 'lastname': vals['lastname'],
                 'phone': vals['phone'],
                 'email': vals['email'],
+                'lang': sms_child_request.lang_code
             })
             sms_child_request.new_partner = True
             sms_child_request.partner_id = partner
